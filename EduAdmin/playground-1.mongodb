@@ -1,0 +1,29 @@
+// // Select the database to use.
+use('test');
+db.courses.insertMany([
+  {
+    title: "JavaScript Fundamentals",
+    description: "Learn the basics of JavaScript including variables, loops, functions, and ES6 features.",
+    price: 3000
+  },
+  {
+    title: "Node.js & Express Bootcamp",
+    description: "Build scalable backend applications using Node.js, Express, MongoDB, and REST APIs.",
+    price: 8000
+  },
+  {
+    title: "React for Beginners",
+    description: "A beginner-friendly course covering React components, hooks, state management, and routing.",
+    price: 6000
+  },
+  {
+    title: "Advanced MongoDB",
+    description: "Deep dive into MongoDB indexing, aggregation pipelines, performance tuning, and schema design.",
+    price: 5000
+  },
+  {
+    title: "Full Stack Web Development",
+    description: "Become a full stack developer by learning HTML, CSS, JavaScript, React, Node.js, and MongoDB.",
+    price: 12000
+  }
+]);
