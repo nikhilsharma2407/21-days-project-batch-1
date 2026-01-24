@@ -12,7 +12,7 @@ const seedAvailableSeats = async (showId, showDetails) => {
   const exists = await redis.exists(availableKey);
 
   if (!exists) {
-    await redis.sAdd(availableKey, showDetails.availableSeats);
+    await redis.sAdd(availableKey, showDetails.seats);
   }
 };
 
