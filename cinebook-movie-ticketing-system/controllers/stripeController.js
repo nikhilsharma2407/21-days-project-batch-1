@@ -48,8 +48,8 @@ const createCheckoutSession = async (req, res, next) => {
       mode: "payment",
       payment_method_types: ["card"],
       line_items: lineItems,
-      success_url: `http://localhost:4000/success`,
-      cancel_url: "http://localhost:4000/cancel",
+      success_url: `https://two1-days-project-batch-1.onrender.com/?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://two1-days-project-batch-1.onrender.com/`,
       metadata: { bookingId: booking._id.toString() },
     });
 
