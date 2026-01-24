@@ -25,9 +25,8 @@ export default function SeatGrid({ show, onBack }) {
 
   const book = async () => {
     const { data } = (await lockSeats({ showId: show._id, seats: selected })).data;
-    console.log("🚀 ~ book ~ data:", data)
     setLockedSeats(prev => [...prev, ...data]);
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     const res = await checkout({ showId: show._id, seats: selected });
     window.location.href = res.data;
   };
