@@ -7,6 +7,7 @@ const showSchema = new mongoose.Schema(
     screen: { type: String },
     startTime: { type: Date },
     seats: [String],
+    bookedSeats: {type: [String], default: []},
     pricing: { A: Number, B: Number, C: Number },
     currency: { type: String },
   }

@@ -1,0 +1,67 @@
+.ticket-card {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 24px;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-card h1 {
+  margin-bottom: 12px;
+}
+
+.ticket-card p {
+  margin: 6px 0;
+  color: #334155;
+}
+
+.ticket-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.success h1 {
+  color: #166534;
+}
+
+.cancel h1 {
+  color: #991b1b;
+}
+
+.seats {
+  margin-top: 8px;
+}
+
+.seat {
+  display: inline-block;
+  margin: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.success .seat {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.cancel .seat {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.meta {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 16px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #2563eb;
+}

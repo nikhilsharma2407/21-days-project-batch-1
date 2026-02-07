@@ -5,13 +5,18 @@ const ShowModel = require("./models/Show");
 const BookingsModel = require("./models/Bookings");
 
 const redis = require("./config/redisClient");
-const { createCheckoutSession } = require("./controllers/stripeController");
+const { createCheckoutSession, getCancelBookingDetails, getSuccessBookingDetails } = require("./controllers/stripeController");
 
 const seedAvailableSeats = async (showId, showDetails) => {
   const availableKey = `available_seats:${showId}`;
   const exists = await redis.exists(availableKey);
 
   if (!exists) {
+    console.log(
+      "Seeding available seats for show:",
+      showId,
+      showDetails.seats.sort(),
+    );
     await redis.sAdd(availableKey, showDetails.seats);
   }
 };
@@ -41,7 +46,7 @@ router.get("/shows/:showId/seats", async (req, res, next) => {
     const lockedSeats = await redis.sMembers(lockedKey);
     res.send({
       availableSeats,
-      lockedSeats,
+      lockedSeats: [...lockedSeats, ...showDetails.bookedSeats],
     });
   } catch (error) {
     next(error);
@@ -90,29 +95,8 @@ router.post("/bookings/book-seats", async (req, res, next) => {
   }
 });
 
-
-
-router.post("/confirm-booking", async (req, res, next) => {
-  try {
-    const { seats, showId } = req.body;
-
-    const lockedKey = `locked_seats:${showId}`;
-    const availableKey = `available_seats:${showId}`;
-
-    const booking = await BookingsModel.create({ showId, seats });
-    await redis.del(availableKey);
-
-    await redis.sRem(lockedKey, seats);
-
-    res.send({
-      message: "Booking confirmed",
-      data: booking,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.post("/bookings/checkout", createCheckoutSession);
+router.get("/bookings/success", getSuccessBookingDetails);
+router.get("/bookings/cancel", getCancelBookingDetails);
 
 module.exports = router;

@@ -1,21 +1,29 @@
 import { useEffect, useState } from "react";
 import { getShowSeats, lockSeats, checkout } from "../api";
+import './styles.css';
 
 export default function SeatGrid({ show, onBack }) {
   const [available, setAvailable] = useState([]);
   const [lockedSeats, setLockedSeats] = useState([]);
   const [selected, setSelected] = useState([]);
 
+  // UI feedback state
+  const [status, setStatus] = useState(null); 
+  // null | "loading" | "success" | "error"
+  const [message, setMessage] = useState("");
+
   useEffect(() => {
     getShowSeats(show._id).then(res => {
       const { availableSeats, lockedSeats } = res.data;
       setAvailable(availableSeats);
-      setLockedSeats(lockedSeats)
+      setLockedSeats(lockedSeats);
     });
   }, [show]);
 
   const toggleSeat = seat => {
     if (!available.includes(seat)) return;
+    if (lockedSeats.includes(seat)) return;
+
     setSelected(prev =>
       prev.includes(seat)
         ? prev.filter(s => s !== seat)
@@ -24,11 +32,43 @@ export default function SeatGrid({ show, onBack }) {
   };
 
   const book = async () => {
-    const { data } = (await lockSeats({ showId: show._id, seats: selected })).data;
-    setLockedSeats(prev => [...prev, ...data]);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const res = await checkout({ showId: show._id, seats: selected });
-    window.location.href = res.data;
+    try {
+      setStatus("loading");
+      setMessage("Locking seats…");
+
+      const lockRes = await lockSeats({
+        showId: show._id,
+        seats: selected
+      });
+
+      const { data: newlyLocked } = lockRes.data;
+      setLockedSeats(prev => [...prev, ...newlyLocked]);
+
+      setMessage("Redirecting to payment…");
+
+      await new Promise(r => setTimeout(r, 500));
+
+      const checkoutRes = await checkout({
+        showId: show._id,
+        seats: selected
+      });
+
+      setStatus("success");
+      window.location.href = checkoutRes.data;
+    } catch (err) {
+      setStatus("error");
+      setMessage(
+        err?.response?.data?.message || "Booking failed. Please try again."
+      );
+
+      // Refetch seats to sync state (in case of lock failure due to concurrency)
+      const res = await getShowSeats(show._id);
+      const { availableSeats, lockedSeats } = res.data;
+
+      setAvailable(availableSeats);
+      setLockedSeats(lockedSeats);
+      setSelected([]); // clear stale selection
+    }
   };
 
   const groupedSeats = show.seats.reduce((acc, seat) => {
@@ -44,15 +84,29 @@ export default function SeatGrid({ show, onBack }) {
     priceGroups[price].push(row);
   });
 
-
   return (
     <>
+      {/* SIMPLE VISUAL FEEDBACK */}
+      {status && (
+        <div className={`alert alert-${status}`}>
+          {status === "loading" && "⏳ "}
+          {status === "success" && "✅ "}
+          {status === "error" && "❌ "}
+          {message}
+        </div>
+      )}
+
       <button onClick={onBack}>⬅ Back</button>
       <h2>{show.title}</h2>
 
       <div className="floating-pay">
-        <button disabled={!selected.length} onClick={book}>
-          Pay & Book ({selected.length})
+        <button
+          disabled={!selected.length || status === "loading"}
+          onClick={book}
+        >
+          {status === "loading"
+            ? "Processing…"
+            : `Pay & Book (${selected.length})`}
         </button>
       </div>
 
@@ -70,7 +124,9 @@ export default function SeatGrid({ show, onBack }) {
                   <div className="seat-grid-wrapper">
                     <div className="seat-row-grid">
                       {groupedSeats[row].map(seat => {
-                        const isAvailable = !lockedSeats.includes(seat) && available.includes(seat);
+                        const isAvailable =
+                          available.includes(seat) &&
+                          !lockedSeats.includes(seat);
                         const isSelected = selected.includes(seat);
 
                         return (
@@ -81,8 +137,8 @@ export default function SeatGrid({ show, onBack }) {
                               (!isAvailable
                                 ? "seat-unavailable"
                                 : isSelected
-                                  ? "seat-selected"
-                                  : "")
+                                ? "seat-selected"
+                                : "")
                             }
                             onClick={() => toggleSeat(seat)}
                           >
@@ -97,10 +153,33 @@ export default function SeatGrid({ show, onBack }) {
             </div>
           ))}
 
-        {/* 🎬 SCREEN */}
         <div className="screen-line"></div>
         <div className="screen-text">SCREEN THIS WAY</div>
       </div>
+
+      {/* <style>{`
+        .alert {
+          position: sticky;
+          top: 0;
+          padding: 12px 16px;
+          margin-bottom: 12px;
+          border-radius: 6px;
+          font-weight: 500;
+          z-index: 10;
+        }
+        .alert-loading {
+          background: #eef2ff;
+          color: #3730a3;
+        }
+        .alert-success {
+          background: #ecfdf5;
+          color: #065f46;
+        }
+        .alert-error {
+          background: #fef2f2;
+          color: #991b1b;
+        }
+      `}</style> */}
     </>
   );
 }
