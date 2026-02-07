@@ -42,8 +42,8 @@ const createCheckoutSession = async (req, res, next) => {
       mode: "payment",
       payment_method_types: ["card"],
       line_items: lineItems,
-      success_url: `http://localhost:4000/result?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:4000/result?session_id={CHECKOUT_SESSION_ID}&isCancelled=true`,
+      success_url: `https://two1-days-project-batch-1.onrender.com/result?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://two1-days-project-batch-1.onrender.com/result?session_id={CHECKOUT_SESSION_ID}&isCancelled=true`,
       // Pass showId and seats as metadata to be used in success/cancel controllers
       metadata: {
         showId,
